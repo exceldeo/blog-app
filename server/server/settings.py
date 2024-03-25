@@ -146,6 +146,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
@@ -175,3 +177,15 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "blog"
+    }
+}
+
+CACHE_TTL = 60 * 1500

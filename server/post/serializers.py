@@ -6,6 +6,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'title', 'content', 'active', 'created_at', 'updated_at', 'author')
         read_only_fields = ('author',)
+        ordering = ['-created_at']
     
     def create(self, validated_data):
         return Post.objects.create(**validated_data)

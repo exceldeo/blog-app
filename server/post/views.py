@@ -9,24 +9,45 @@ from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from post.permissions import IsAuthorOrAdminOrReadOnly
 
+from rest_framework.pagination import PageNumberPagination
+
+from django.core.cache import cache
+
+from server.settings import CACHE_TTL
+
 class PostList(generics.ListCreateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
     
     def get_queryset(self):
+        queryset = cache.get('posts')
+        if not queryset:
+            queryset = Post.objects.all()
+            cache.set('posts', queryset, timeout=CACHE_TTL)
+        if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
+            return queryset.filter(title__icontains=self.request.query_params['keyword']).order_by('-created_at')
         if not self.request.user.is_authenticated or self.request.user.is_superuser:
-            return Post.objects.all()
-        return Post.objects.filter(author=self.request.user)
+            return queryset.filter(active=True).order_by('-created_at')
+        return queryset.order_by('-created_at')
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
-
+    
+    def get_object(self):
+        post_id = self.kwargs['pk']
+        post = cache.get(f'post_{post_id}')
+        if not post:
+            post = super().get_object()
+            cache.set(f'post_{post_id}', post, timeout=CACHE_TTL)
+        return post
+        
 class PostCreate(generics.CreateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
