@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Post
+from rest_framework.response import Response
+from rest_framework import status
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,7 +29,13 @@ class PostSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
     
-
+    def find_by_id_and_author(self, id, author):
+        try:
+            post = Post.objects.get(id=id, author=author)
+            return post
+        except Post.DoesNotExist:
+            return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+        
 
     
 

@@ -26,7 +26,7 @@ class ChangePassword(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user
     
-    def update(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         user = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -48,7 +48,7 @@ class UpdateProfile(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user
     
-    def update(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # Updated method to post
         user = self.get_object()
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():

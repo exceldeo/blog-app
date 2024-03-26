@@ -61,25 +61,66 @@ class PostUpdate(generics.UpdateAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
 
-    def perform_update(self, serializer):
-        serializer.save()
-        
+    def post(self, request, *args, **kwargs):
+        post_id = request.data.get('id')
+        if not post_id:
+            return JsonResponse({"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_superuser and request.user != post.author:
+            return JsonResponse({"error": "You do not have permission to update this post"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.serializer_class(post, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PostDelete(generics.DestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
 
-    def perform_destroy(self, instance):
-        instance.delete()
+    def post(self, request, *args, **kwargs):
+        post_id = request.data.get('id')
+        if not post_id:
+            return JsonResponse({"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_superuser and request.user != post.author:
+            return JsonResponse({"error": "You do not have permission to delete this post"}, status=status.HTTP_403_FORBIDDEN)
+
+        post.delete()
+        return JsonResponse({"message": "Post deleted successfully"}, status=status.HTTP_200_OK)
     
 class PostChangeStatus(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
     
-    def perform_update(self, serializer):
-        serializer.save(active=not serializer.instance.active)
+    def post(self, request, *args, **kwargs):
+        post_id = request.data.get('id')
+        if not post_id:
+            return JsonResponse({"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_superuser and request.user != post.author:
+            return JsonResponse({"error": "You do not have permission to change the status of this post"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.serializer_class(post)
+        post = serializer.change_status(post)
+        return JsonResponse(serializer.data)
     
         
