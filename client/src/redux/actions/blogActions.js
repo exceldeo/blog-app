@@ -2,10 +2,14 @@
 import { FETCH_BLOGS, FETCH_BLOG } from "../types";
 import { getBlogs } from "../../api/blog";
 
-export const fetchBlogs = () => {
+export const fetchBlogs = (page = 1) => {
   return async (dispatch) => {
     try {
-      const blogs = await getBlogs();
+      const blogs = await getBlogs(page);
+      if (page > 1) {
+        const additionalBlogs = await getBlogs(page - 1);
+        blogs.results = [...additionalBlogs.results, ...blogs.results];
+      }
       dispatch({
         type: FETCH_BLOGS,
         payload: blogs,

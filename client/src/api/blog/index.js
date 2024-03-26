@@ -1,10 +1,8 @@
 import apiClient from "../apiClient";
 
-export const getBlogs = async () => {
+export const getBlogs = async (page = 1) => {
   try {
-    const response = await apiClient.get("/postList/");
-    console.log(response.data);
-    console.log("fetching blogs");
+    const response = await apiClient.get(`/postList/?page=${page}`);
     return response.data;
   } catch (error) {
     throw error;

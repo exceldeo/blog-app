@@ -2,9 +2,11 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs } from "../../redux/actions/blogActions";
-import { List, ListItem, ListItemText } from "@mui/material";
+import { List, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import MainLayout from "../Layout/MainLayout";
+import MainCard from "../../ui-component/cards/MainCard";
+import { Typography } from "@mui/material";
 
 const BlogList = () => {
   const dispatch = useDispatch();
@@ -14,19 +16,58 @@ const BlogList = () => {
     dispatch(fetchBlogs());
   }, [dispatch]);
 
+  const handleLoadMore = () => {
+    const nextPage = new URL(blogs.next).searchParams.get("page");
+    dispatch(fetchBlogs(parseInt(nextPage)));
+  };
   return (
     <MainLayout>
+      <Button
+        component={Link}
+        to="/blog/create"
+        variant="contained" // Changed variant to outlined
+        color="primary"
+        sx={{ margin: "auto" }} // Centered the button
+      >
+        Create Blog
+      </Button>
       <List>
-        {blogs &&
+        {blogs && blogs.results.length !== 0 ? (
           blogs.results.map((blog) => (
-            <ListItem key={blog.id}>
-              <ListItemText
-                primary={blog.title}
-                secondary={<Link to={`/blog/${blog.id}`}>Read More</Link>}
-              />
-            </ListItem>
-          ))}
+            <MainCard title={blog.title} key={blog.id} sx={{ mb: 3 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  whiteSpace: "pre-line",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                }}>
+                {blog.content}
+              </Typography>
+              <Button component={Link} to={`/blog/${blog.id}`}>
+                Read More
+              </Button>
+            </MainCard>
+          ))
+        ) : (
+          <Typography variant="h6" sx={{ textAlign: "center", mt: 5, mb: 5 }}>
+            No Data Blog
+          </Typography>
+        )}
       </List>
+      {blogs && blogs.next && (
+        <Button
+          onClick={handleLoadMore}
+          variant="outlined" // Changed variant to outlined
+          color="primary"
+          sx={{ margin: "auto", display: "block" }} // Centered the button
+        >
+          More
+        </Button>
+      )}
     </MainLayout>
   );
 };

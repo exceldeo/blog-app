@@ -9,7 +9,7 @@ const MainLayout = ({ children }) => {
       <Header />
       <Container
         sx={{
-          marginTop: "80px",
+          marginTop: "100px",
           minHeight: "calc(100vh - 160px)",
         }}>
         {children}
