@@ -35,16 +35,32 @@ export const logout = () => {
   };
 };
 
-export const register = (username, email, password, fname, lname) => {
+export const register = ({
+  username,
+  password,
+  confirmPassword,
+  email,
+  fname,
+  lname,
+}) => {
   return async (dispatch) => {
+    console.log("register fucntion : ", {
+      username,
+      password,
+      confirmPassword,
+      email,
+      fname,
+      lname,
+    });
     try {
-      const response = await registerApi(
+      const response = await registerApi({
         username,
         password,
+        confirmPassword,
         email,
         fname,
-        lname
-      );
+        lname,
+      });
       dispatch({
         type: REGISTER,
         payload: response,

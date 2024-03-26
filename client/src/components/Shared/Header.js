@@ -1,36 +1,25 @@
-// Header.js
 import React from "react";
+import PropTypes from "prop-types";
 import { AppBar, Toolbar, Typography, Button } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../../redux/actions/authActions";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import ProfileSection from "./ProfileSection";
 
-const Header = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const Header = ({ handleLeftDrawerToggle }) => {
   const { token } = useSelector((state) => state.auth);
 
-  const logoutHandler = () => {
-    dispatch(logout());
-    navigate("/login");
-  };
-
   return (
-    <AppBar position="static">
+    <AppBar>
       <Toolbar>
-        <Typography variant="h6" style={{ flexGrow: 1 }}>
-          <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-            My Blog
+        <Typography variant="h4" sx={{ flexGrow: 1 }}>
+          <Link to="/" style={{ textDecoration: "none", color: "white" }}>
+            Blog
           </Link>
         </Typography>
+
         {token ? (
           <>
-            <Button color="inherit" component={Link} to="/user/profile">
-              Profile
-            </Button>
-            <Button color="inherit" onClick={logoutHandler}>
-              Logout
-            </Button>
+            <ProfileSection />
           </>
         ) : (
           <>
@@ -45,6 +34,10 @@ const Header = () => {
       </Toolbar>
     </AppBar>
   );
+};
+
+Header.propTypes = {
+  handleLeftDrawerToggle: PropTypes.func,
 };
 
 export default Header;

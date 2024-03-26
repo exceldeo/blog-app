@@ -27,7 +27,9 @@ function PrivateRoute({ children }) {
 
   useEffect(() => {
     if (!user && token) {
+      console.log("Fetching profile");
       getProfile().then((data) => {
+        console.log(data);
         dispatch(updateProfile(data));
       });
     }
