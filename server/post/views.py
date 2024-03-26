@@ -29,10 +29,12 @@ class PostList(generics.ListCreateAPIView):
         if not queryset:
             queryset = Post.objects.all()
             cache.set('posts', queryset, timeout=CACHE_TTL)
-        if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
-            return queryset.filter(title__icontains=self.request.query_params['keyword']).order_by('-created_at')
-        if not self.request.user.is_authenticated or self.request.user.is_superuser:
+        # if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
+        #     return queryset.filter(title__icontains=self.request.query_params['keyword']).order_by('-created_at')
+        if not self.request.user.is_authenticated:
             return queryset.filter(active=True).order_by('-created_at')
+        if self.request.user.is_authenticated:
+            return queryset.filter(author=self.request.user).order_by('-created_at')
         return queryset.order_by('-created_at')
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
