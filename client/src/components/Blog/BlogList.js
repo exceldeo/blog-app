@@ -11,6 +11,7 @@ import { Typography } from "@mui/material";
 const BlogList = () => {
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blog.blogs);
+  const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(fetchBlogs());
@@ -22,15 +23,22 @@ const BlogList = () => {
   };
   return (
     <MainLayout>
-      <Button
-        component={Link}
-        to="/blog/create"
-        variant="contained" // Changed variant to outlined
-        color="primary"
-        sx={{ margin: "auto" }} // Centered the button
-      >
-        Create Blog
-      </Button>
+      {token && (
+        <>
+          <Typography variant="h2" sx={{ textAlign: "center", mt: 5, mb: 5 }}>
+            Welcome to Blog
+          </Typography>
+          <Button
+            component={Link}
+            to="/blog/create"
+            variant="contained" // Changed variant to outlined
+            color="primary"
+            sx={{ margin: "auto" }} // Centered the button
+          >
+            Create Blog
+          </Button>
+        </>
+      )}
       <List>
         {blogs && blogs.results.length !== 0 ? (
           blogs.results.map((blog) => (
