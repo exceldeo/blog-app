@@ -1,6 +1,12 @@
 // blogActions.js
 import { FETCH_BLOGS, FETCH_BLOG } from "../types";
-import { getBlogs } from "../../api/blog";
+import {
+  useCreateBlog,
+  useChangeStatusBlog,
+  useUpdateBlog,
+  getBlog,
+  getBlogs,
+} from "../../api/blog";
 
 export const fetchBlogs = (page = 1) => {
   return async (dispatch) => {
@@ -22,10 +28,53 @@ export const fetchBlogs = (page = 1) => {
 };
 
 export const fetchBlog = (id) => {
-  // Here you would typically make a request to your backend API to fetch a single blog
-  // For simplicity, we'll just return a dummy blog
-  return {
-    type: FETCH_BLOG,
-    payload: { id, title: "Blog", content: "Content" },
+  return async (dispatch) => {
+    try {
+      const blog = await getBlog(id);
+      dispatch({
+        type: FETCH_BLOG,
+        payload: blog,
+      });
+    } catch (error) {
+      console.error(error);
+      // Handle error
+    }
+  };
+};
+
+export const createBlog = (blog) => {
+  return async (dispatch) => {
+    try {
+      // Create blog
+      await useCreateBlog(blog);
+      fetchBlogs();
+    } catch (error) {
+      console.error(error);
+      // Handle error
+    }
+  };
+};
+
+export const updateBlog = (blog) => {
+  return async (dispatch) => {
+    try {
+      await useUpdateBlog(blog);
+      fetchBlogs();
+    } catch (error) {
+      console.error(error);
+      // Handle error
+    }
+  };
+};
+
+export const changeStatusBlog = (id) => {
+  return async (dispatch) => {
+    try {
+      await useChangeStatusBlog(id);
+      fetchBlogs();
+    } catch (error) {
+      console.error(error);
+      // Handle error
+    }
   };
 };

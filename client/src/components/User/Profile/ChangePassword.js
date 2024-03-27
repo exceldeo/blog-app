@@ -8,14 +8,15 @@ import {
   InputAdornment,
   IconButton,
   OutlinedInput,
+  Typography,
 } from "@mui/material";
-import { changePassword } from "../../api/profile";
+import { changePassword } from "../../../api/profile";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import MainLayout from "../Layout/MainLayout";
-import MainCard from "../../ui-component/cards/MainCard";
+import MainLayout from "../../Layout/MainLayout";
+import MainCard from "../../../ui-component/cards/MainCard";
 import { Box } from "@mui/system";
-import AnimateButton from "../../ui-component/extended/AnimateButton";
+import AnimateButton from "../../../ui-component/extended/AnimateButton";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const ChangePassword = () => {
@@ -74,6 +75,9 @@ const ChangePassword = () => {
                 values,
               }) => (
                 <form noValidate onSubmit={handleSubmit}>
+                  <Typography variant="h2" sx={{ textAlign: "center", mb: 3 }}>
+                    Change Password
+                  </Typography>
                   <FormControl
                     fullWidth
                     error={Boolean(touched.oldPassword && errors.oldPassword)}

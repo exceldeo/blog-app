@@ -4,5 +4,7 @@ export const LOGIN = "LOGIN";
 export const LOGOUT = "LOGOUT";
 export const REGISTER = "REGISTER";
 export const UPDATE_BLOG = "UPDATE_BLOG";
+export const DELETE_BLOG = "DELETE_BLOG";
+export const CREATE_BLOG = "CREATE_BLOG";
 export const UPDATE_PROFILE = "UPDATE_PROFILE";
 export const FETCH_PROFILE = "FETCH_PROFILE";

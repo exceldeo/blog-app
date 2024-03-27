@@ -30,7 +30,6 @@ export const register = async ({
     last_name: lname,
   };
   try {
-    console.log("register : ", data);
     const response = await apiClient.post("/register/", data);
     return response.data;
   } catch (error) {
@@ -39,16 +38,13 @@ export const register = async ({
 };
 
 export const logout = async () => {
-  console.log("refresh : ", localStorage.getItem("refreshToken"));
   const response = await apiClient
     .post("/logout/", {
       refresh_token: localStorage.getItem("refreshToken"),
     })
     .catch((error) => {
-      console.log("error : ", error.response);
       return error.response;
     });
-  console.log("response : ", response.data);
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("accessToken");
   if (response.status === 400 || response.status === 401) {

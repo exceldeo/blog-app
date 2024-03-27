@@ -4,11 +4,16 @@ import { useSelector } from "react-redux";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Login from "../components/Auth/Login";
 import Register from "../components/Auth/Register";
-import EditProfile from "../components/Profile/EditProfile";
-import ViewProfile from "../components/Profile/ViewProfile";
+import EditProfile from "../components/User/Profile/EditProfile";
+import ViewProfile from "../components/User/Profile/ViewProfile";
 import BlogList from "../components/Blog/BlogList";
+import BlogPost from "../components/Blog/BlogPost";
+import UserBlogList from "../components/User/Blog/BlogList";
+import UserBlogPost from "../components/User/Blog/BlogPost";
+import UserBlogCreate from "../components/User/Blog/BlogCreate";
+import UserBlogEdit from "../components/User/Blog/BlogEdit";
 import NotFound from "../components/404/404";
-import ChangePassword from "../components/Profile/ChangePassword";
+import ChangePassword from "../components/User/Profile/ChangePassword";
 import { logout } from "../redux/actions/authActions";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
@@ -29,15 +34,12 @@ function PrivateRoute({ children }) {
 
   useEffect(() => {
     if (!user && token) {
-      console.log("Fetching profile");
       getProfile()
         .then((data) => {
-          console.log("data:", data);
           dispatch(updateProfile(data));
         })
         .catch((error) => {
           if (error.response && error.response.status === 401) {
-            console.log("Unauthorized, redirecting to login");
             dispatch(logout());
             navigate("/login");
           } else {
@@ -67,6 +69,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/blog/:id"
+        element={
+          <PublicRoute>
+            <BlogPost />
+          </PublicRoute>
+        }
+      />
+      <Route
         path="/login"
         element={
           <PublicRoute>
@@ -87,7 +97,31 @@ function AppRoutes() {
           path="blogs"
           element={
             <PrivateRoute>
-              <BlogList />
+              <UserBlogList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="blog/:id"
+          element={
+            <PrivateRoute>
+              <UserBlogPost />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="create-blog"
+          element={
+            <PrivateRoute>
+              <UserBlogCreate />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="edit-blog/:id"
+          element={
+            <PrivateRoute>
+              <UserBlogEdit />
             </PrivateRoute>
           }
         />
@@ -116,14 +150,7 @@ function AppRoutes() {
           }
         />
       </Route>
-      <Route
-        path="/blog/:id"
-        element={
-          <PrivateRoute>
-            <BlogList />
-          </PrivateRoute>
-        }
-      />
+
       <Route
         path="*"
         element={

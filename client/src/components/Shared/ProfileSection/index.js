@@ -80,10 +80,6 @@ const ProfileSection = () => {
     prevOpen.current = open;
   }, [open]);
 
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
-
   return (
     <>
       <Chip

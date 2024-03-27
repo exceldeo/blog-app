@@ -1,10 +1,10 @@
 // EditProfile.js
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateProfile } from "../../redux/actions/profileActions";
+import { updateProfile } from "../../../redux/actions/profileActions";
 import { Formik } from "formik";
-import MainLayout from "../Layout/MainLayout";
-import MainCard from "../../ui-component/cards/MainCard";
+import MainLayout from "../../Layout/MainLayout";
+import MainCard from "../../../ui-component/cards/MainCard";
 import {
   Grid,
   FormControl,
@@ -12,8 +12,9 @@ import {
   OutlinedInput,
   Button,
   Box,
+  Typography,
 } from "@mui/material";
-import AnimateButton from "../../ui-component/extended/AnimateButton";
+import AnimateButton from "../../../ui-component/extended/AnimateButton";
 
 const EditProfile = () => {
   const dispatch = useDispatch();
@@ -58,6 +59,9 @@ const EditProfile = () => {
                 values,
               }) => (
                 <form noValidate onSubmit={handleSubmit}>
+                  <Typography variant="h2" sx={{ textAlign: "center", mb: 3 }}>
+                    Edit Profile
+                  </Typography>
                   <FormControl fullWidth disabled sx={{ mb: 2 }}>
                     <InputLabel htmlFor="outlined-adornment-username">
                       Username

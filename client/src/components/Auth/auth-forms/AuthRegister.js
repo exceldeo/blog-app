@@ -66,7 +66,6 @@ const FormRegister = ({ ...others }) => {
           lname: Yup.string().max(255).required("Last Name is required"), // Added validation for last name
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-          console.log("values : ", values);
           try {
             dispatch(register(values));
             setStatus({ success: true });

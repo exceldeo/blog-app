@@ -44,14 +44,6 @@ export const register = ({
   lname,
 }) => {
   return async (dispatch) => {
-    console.log("register fucntion : ", {
-      username,
-      password,
-      confirmPassword,
-      email,
-      fname,
-      lname,
-    });
     try {
       const response = await registerApi({
         username,

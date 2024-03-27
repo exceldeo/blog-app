@@ -11,14 +11,14 @@ export const getBlogs = async (page = 1) => {
 
 export const getBlog = async (id) => {
   try {
-    const response = await apiClient.get(`/postDetail/${id}`);
+    const response = await apiClient.get(`/postDetail/${id}/`);
     return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-export const createBlog = async (blog) => {
+export const useCreateBlog = async (blog) => {
   try {
     const response = await apiClient.post("/postCreate/", blog);
     return response.data;
@@ -27,7 +27,7 @@ export const createBlog = async (blog) => {
   }
 };
 
-export const updateBlog = async (blog) => {
+export const useUpdateBlog = async (blog) => {
   try {
     const response = await apiClient.post(`/postUpdate/`, blog);
     return response.data;
@@ -36,7 +36,7 @@ export const updateBlog = async (blog) => {
   }
 };
 
-export const deleteBlog = async (blog) => {
+export const useDeleteBlog = async (blog) => {
   try {
     const response = await apiClient.post(`/postDelete/`, blog);
     return response.data;
@@ -45,9 +45,9 @@ export const deleteBlog = async (blog) => {
   }
 };
 
-export const changeStatusBlog = async (blog) => {
+export const useChangeStatusBlog = async (id) => {
   try {
-    const response = await apiClient.post(`/postChangeStatus/`, blog);
+    const response = await apiClient.post(`/postChangeStatus/`, { id: id });
     return response.data;
   } catch (error) {
     throw error;
