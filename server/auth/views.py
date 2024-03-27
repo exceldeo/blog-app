@@ -52,10 +52,10 @@ class UpdateProfile(generics.UpdateAPIView):
         user = self.get_object()
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {"message": "Profile updated successfully"},
-                status=status.HTTP_200_OK)
+            updated_user = serializer.save()
+            user_data = UserSerializer(updated_user).data
+            user_data["is_user_admin"] = user.is_staff  # Add is_user_admin to user data
+            return Response(user_data, status=status.HTTP_200_OK)  # Return user data with is_user_admin
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
