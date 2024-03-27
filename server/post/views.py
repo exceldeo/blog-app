@@ -73,12 +73,14 @@ class PostUpdate(generics.UpdateAPIView):
         except Post.DoesNotExist:
             return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if not request.user.is_superuser and request.user != post.author:
+        if not request.user.is_superuser and request.user.username != post.author:
             return JsonResponse({"error": "You do not have permission to update this post"}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.serializer_class(post, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Invalidate the cache for this post
+            cache.delete(f'post_{post_id}')
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -97,7 +99,7 @@ class PostDelete(generics.DestroyAPIView):
         except Post.DoesNotExist:
             return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if not request.user.is_superuser and request.user != post.author:
+        if not request.user.is_superuser and request.user.username != post.author:
             return JsonResponse({"error": "You do not have permission to delete this post"}, status=status.HTTP_403_FORBIDDEN)
 
         post.delete()
@@ -118,7 +120,7 @@ class PostChangeStatus(generics.UpdateAPIView):
         except Post.DoesNotExist:
             return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if not request.user.is_superuser and request.user != post.author:
+        if not request.user.is_superuser and request.user.username != post.author:
             return JsonResponse({"error": "You do not have permission to change the status of this post"}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.serializer_class(post)
