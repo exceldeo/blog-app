@@ -80,4 +80,5 @@ class GetProfile(APIView):
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)
-        return Response(serializer.data)
+        is_user_admin = user.is_staff  # Check if user is admin
+        return Response({**serializer.data, "is_user_admin": is_user_admin})
