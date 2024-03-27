@@ -30,9 +30,11 @@ import Transitions from "../../../ui-component/extended/Transitions";
 // assets
 import {
   IconBook,
+  IconBooks,
+  IconLock,
   IconLogout,
-  IconSettings,
   IconUser,
+  IconUserEdit,
 } from "@tabler/icons-react";
 
 import { useDispatch } from "react-redux";
@@ -141,7 +143,6 @@ const ProfileSection = () => {
               <ClickAwayListener onClickAway={handleClose}>
                 <MainCard
                   border={false}
-                  elevation={16}
                   content={false}
                   boxShadow
                   shadow={theme.shadows[16]}>
@@ -156,12 +157,17 @@ const ProfileSection = () => {
                           {user?.username}
                         </Typography>
                       </Stack>
+                      <Stack direction="row" alignItems="center">
+                        <Typography variant="caption">
+                          logged in as {user?.is_user_admin ? "admin" : "user"}
+                        </Typography>
+                      </Stack>
                     </Stack>
                   </Box>
                   <PerfectScrollbar
                     style={{
                       height: "100%",
-                      maxHeight: "calc(100vh - 100px)",
+                      maxHeight: "calc(100vh - 600px)",
                       overflowX: "hidden",
                     }}>
                     <Box sx={{ p: 1 }}>
@@ -189,7 +195,7 @@ const ProfileSection = () => {
                             navigate("/user/blogs");
                           }}>
                           <ListItemIcon>
-                            <IconBook stroke={1.5} size="1.3rem" />
+                            <IconBooks stroke={1.5} size="1.3rem" />
                           </ListItemIcon>
                           <ListItemText
                             primary={
@@ -197,23 +203,25 @@ const ProfileSection = () => {
                             }
                           />
                         </ListItemButton>
-                      </List>
-                      <Divider />
-                      <List
-                        component="nav"
-                        sx={{
-                          width: "100%",
-                          maxWidth: 350,
-                          minWidth: 300,
-                          backgroundColor: theme.palette.background.paper,
-                          borderRadius: "10px",
-                          [theme.breakpoints.down("md")]: {
-                            minWidth: "100%",
-                          },
-                          "& .MuiListItemButton-root": {
-                            mt: 0.5,
-                          },
-                        }}>
+                        <ListItemButton
+                          sx={{
+                            borderRadius: `10px`,
+                          }}
+                          onClick={() => {
+                            navigate("/user/create-blog");
+                          }}>
+                          <ListItemIcon>
+                            <IconBook stroke={1.5} size="1.3rem" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2">
+                                Create Blog
+                              </Typography>
+                            }
+                          />
+                        </ListItemButton>
+                        <Divider />
                         <ListItemButton
                           sx={{
                             borderRadius: `10px`,
@@ -222,11 +230,47 @@ const ProfileSection = () => {
                             navigate("/user");
                           }}>
                           <ListItemIcon>
-                            <IconSettings stroke={1.5} size="1.3rem" />
+                            <IconUser stroke={1.5} size="1.3rem" />
                           </ListItemIcon>
                           <ListItemText
                             primary={
                               <Typography variant="body2">Profile</Typography>
+                            }
+                          />
+                        </ListItemButton>
+                        <ListItemButton
+                          sx={{
+                            borderRadius: `10px`,
+                          }}
+                          onClick={() => {
+                            navigate("/user/edit-profile");
+                          }}>
+                          <ListItemIcon>
+                            <IconUserEdit stroke={1.5} size="1.3rem" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2">
+                                Edit Profile
+                              </Typography>
+                            }
+                          />
+                        </ListItemButton>
+                        <ListItemButton
+                          sx={{
+                            borderRadius: `10px`,
+                          }}
+                          onClick={() => {
+                            navigate("/user/change-password");
+                          }}>
+                          <ListItemIcon>
+                            <IconLock stroke={1.5} size="1.3rem" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2">
+                                Change Password
+                              </Typography>
                             }
                           />
                         </ListItemButton>

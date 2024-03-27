@@ -9,9 +9,28 @@ export const getProfile = async () => {
   }
 };
 
-export const updateProfile = async (profile) => {
+export const useUpdateProfile = async (profile) => {
+  const data = {
+    first_name: profile.fname,
+    last_name: profile.lname,
+    photo: profile.photo,
+  };
   try {
-    const response = await apiClient.put("/profile", profile);
+    const response = await apiClient.post("/updateProfile/", data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const changePassword = async (password) => {
+  const data = {
+    old_password: password.oldPassword,
+    new_password: password.newPassword,
+    confirm_password: password.confirmPassword,
+  };
+  try {
+    const response = await apiClient.post("/changePassword/", data);
     return response.data;
   } catch (error) {
     throw error;

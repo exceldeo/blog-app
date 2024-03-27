@@ -39,20 +39,22 @@ export const register = async ({
 };
 
 export const logout = async () => {
-  try {
-    console.log("refresh : ", localStorage.getItem("refreshToken"));
-    const response = await apiClient.post("/logout/", {
+  console.log("refresh : ", localStorage.getItem("refreshToken"));
+  const response = await apiClient
+    .post("/logout/", {
       refresh_token: localStorage.getItem("refreshToken"),
+    })
+    .catch((error) => {
+      console.log("error : ", error.response);
+      return error.response;
     });
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("accessToken");
-    if (response.status === 400) {
-      return "success";
-    }
-    return response.data;
-  } catch (error) {
-    throw error;
+  console.log("response : ", response.data);
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("accessToken");
+  if (response.status === 400 || response.status === 401) {
+    return "success";
   }
+  return response.data;
 };
 
 export const refreshToken = async () => {

@@ -1,13 +1,14 @@
 // routes/index.js
 import React from "react";
 import { useSelector } from "react-redux";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Login from "../components/Auth/Login";
 import Register from "../components/Auth/Register";
 import EditProfile from "../components/Profile/EditProfile";
 import ViewProfile from "../components/Profile/ViewProfile";
 import BlogList from "../components/Blog/BlogList";
 import NotFound from "../components/404/404";
+import ChangePassword from "../components/Profile/ChangePassword";
 import { logout } from "../redux/actions/authActions";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
@@ -17,23 +18,34 @@ import { updateProfile } from "../redux/actions/profileActions";
 function PrivateRoute({ children }) {
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.profile);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!token) {
+    if (!token && user) {
       dispatch(logout());
     }
-  }, [token, dispatch]);
+  }, [token, dispatch, user]);
 
   useEffect(() => {
     if (!user && token) {
       console.log("Fetching profile");
-      getProfile().then((data) => {
-        console.log(data);
-        dispatch(updateProfile(data));
-      });
+      getProfile()
+        .then((data) => {
+          console.log("data:", data);
+          dispatch(updateProfile(data));
+        })
+        .catch((error) => {
+          if (error.response && error.response.status === 401) {
+            console.log("Unauthorized, redirecting to login");
+            dispatch(logout());
+            navigate("/login");
+          } else {
+            console.error("Error while fetching profile:", error);
+          }
+        });
     }
-  }, [user, dispatch, token]);
+  }, [user, dispatch, token, navigate]);
 
   return token ? children : <Navigate to="/login" />;
 }
@@ -88,23 +100,22 @@ function AppRoutes() {
           }
         />
         <Route
-          path="edit"
+          path="edit-profile"
           element={
             <PrivateRoute>
               <EditProfile />
             </PrivateRoute>
           }
         />
+        <Route
+          path="change-password"
+          element={
+            <PrivateRoute>
+              <ChangePassword />
+            </PrivateRoute>
+          }
+        />
       </Route>
-      {/* <Route
-        path="/user"
-        element={
-          <PrivateRoute>
-            <Routes>
-            </Routes>
-          </PrivateRoute>
-        }
-      /> */}
       <Route
         path="/blog/:id"
         element={
