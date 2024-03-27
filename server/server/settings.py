@@ -56,6 +56,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'server.middleware.RequestTimeMiddleware',
+    'server.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'server.urls'
@@ -186,3 +188,17 @@ CACHES = {
 }
 
 CACHE_TTL = 60 * 1500
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
