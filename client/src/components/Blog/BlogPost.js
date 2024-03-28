@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { Grid, Typography } from "@mui/material";
 import MainLayout from "../Layout/MainLayout";
 import MainCard from "../../ui-component/cards/MainCard";
+import CommentList from "./comment/CommentList";
 
 const BlogPost = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const BlogPost = () => {
             </Typography>
             <Typography variant="body1">{blog.blog?.content}</Typography>
           </MainCard>
+          <CommentList idPost={id} />
         </Grid>
       </Grid>
     </MainLayout>

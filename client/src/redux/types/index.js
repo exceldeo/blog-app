@@ -8,3 +8,5 @@ export const DELETE_BLOG = "DELETE_BLOG";
 export const CREATE_BLOG = "CREATE_BLOG";
 export const UPDATE_PROFILE = "UPDATE_PROFILE";
 export const FETCH_PROFILE = "FETCH_PROFILE";
+export const FETCH_COMMENTS = "FETCH_COMMENTS";
+export const CREATE_COMMENT = "CREATE_COMMENT";

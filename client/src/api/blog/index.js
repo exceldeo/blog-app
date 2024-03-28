@@ -16,7 +16,7 @@ export const getBlogs = async ({ page = 1, guest = false }) => {
 
 export const getBlog = async (id) => {
   try {
-    const response = await apiClient.get(`/postDetail/${id}/`);
+    const response = await apiUnauthenticated.get(`/postDetail/${id}/`);
     return response.data;
   } catch (error) {
     throw error;
