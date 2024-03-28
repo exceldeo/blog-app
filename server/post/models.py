@@ -26,3 +26,14 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+# i want to make class comment, but i don't know how to make it i dont want make with ForeignKey
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    content = CharField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    author = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.content

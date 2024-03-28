@@ -2,10 +2,11 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from post.models import Post
-from post.serializers import PostSerializer
+from post.models import Post, Comment
+from post.serializers import PostSerializer, CommentSerializer
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from post.permissions import IsAuthorOrAdminOrReadOnly
 
@@ -132,4 +133,33 @@ class PostChangeStatus(generics.UpdateAPIView):
         cache.delete('posts')
         return JsonResponse(serializer.data)
     
-        
+class CommentList(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        post_id = self.request.query_params.get('post', None)
+        if post_id is not None:
+            queryset = cache.get(f'comments_{post_id}')
+            if not queryset:
+                queryset = Comment.objects.filter(post=post_id).order_by('-created_at')
+                cache.set(f'comments_{post_id}', queryset, timeout=CACHE_TTL)
+            return queryset
+        else:
+            return Comment.objects.none()  # Return an empty queryset if no post ID is provided
+    
+class CommentCreate(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        post_id = self.request.data.get('post', None)
+        if post_id is not None:
+            serializer.save(author=self.request.user, post_id=post_id)
+            # Invalidate the cache for the comments of this post
+            cache.delete(f'comments_{post_id}')
+
