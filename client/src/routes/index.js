@@ -53,8 +53,7 @@ function PrivateRoute({ children }) {
 }
 
 function PublicRoute({ children }) {
-  const { token } = useSelector((state) => state.auth);
-  return !token ? children : <Navigate to="/user/" />;
+  return children;
 }
 
 function AppRoutes() {

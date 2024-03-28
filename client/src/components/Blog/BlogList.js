@@ -13,12 +13,12 @@ const BlogList = () => {
   const blogs = useSelector((state) => state.blog.blogs);
 
   useEffect(() => {
-    dispatch(fetchBlogs());
+    dispatch(fetchBlogs({ guest: true }));
   }, [dispatch]);
 
   const handleLoadMore = () => {
     const nextPage = new URL(blogs.next).searchParams.get("page");
-    dispatch(fetchBlogs(parseInt(nextPage)));
+    dispatch(fetchBlogs({ page: parseInt(nextPage), guest: true }));
   };
   return (
     <MainLayout>

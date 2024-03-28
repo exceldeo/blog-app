@@ -1,4 +1,4 @@
-import apiClient from "../apiClient";
+import { apiClient } from "../apiClient";
 
 export const getProfile = async () => {
   try {
@@ -31,6 +31,20 @@ export const changePassword = async (password) => {
   };
   try {
     const response = await apiClient.post("/changePassword/", data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const useUpdateProfilePhoto = async (formData) => {
+  console.log(formData);
+  try {
+    const response = await apiClient.post("/updateProfilePhoto/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   } catch (error) {
     throw error;

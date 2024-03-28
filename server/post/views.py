@@ -80,7 +80,8 @@ class PostUpdate(generics.UpdateAPIView):
         if serializer.is_valid():
             serializer.save()
             # Invalidate the cache for this post
-            cache.delete(f'post_{post_id}')
+            cache.set(f'post_{post_id}', post, timeout=CACHE_TTL)
+            cache.delete('posts')
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -103,6 +104,8 @@ class PostDelete(generics.DestroyAPIView):
             return JsonResponse({"error": "You do not have permission to delete this post"}, status=status.HTTP_403_FORBIDDEN)
 
         post.delete()
+        cache.delete(f'post_{post_id}')
+        cache.delete('posts')
         return JsonResponse({"message": "Post deleted successfully"}, status=status.HTTP_200_OK)
     
 class PostChangeStatus(generics.UpdateAPIView):
@@ -125,6 +128,8 @@ class PostChangeStatus(generics.UpdateAPIView):
 
         serializer = self.serializer_class(post)
         post = serializer.change_status(post)
+        cache.set(f'post_{post_id}', post, timeout=CACHE_TTL)
+        cache.delete('posts')
         return JsonResponse(serializer.data)
     
         

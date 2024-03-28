@@ -21,17 +21,17 @@ const BlogList = () => {
   const blogs = useSelector((state) => state.blog.blogs);
   const profile = useSelector((state) => state.profile);
   useEffect(() => {
-    dispatch(fetchBlogs());
+    dispatch(fetchBlogs({}));
   }, [dispatch]);
 
   const handleLoadMore = () => {
     const nextPage = new URL(blogs.next).searchParams.get("page");
-    dispatch(fetchBlogs(parseInt(nextPage)));
+    dispatch(fetchBlogs({ page: parseInt(nextPage) }));
   };
 
   const handleStatusChange = (id) => {
     dispatch(changeStatusBlog(id)).then(() => {
-      dispatch(fetchBlogs());
+      dispatch(fetchBlogs({}));
     });
   };
 

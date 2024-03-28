@@ -2,6 +2,7 @@
 import { UPDATE_PROFILE, FETCH_PROFILE } from "../types";
 import { getProfile } from "../../api/profile";
 import { useUpdateProfile } from "../../api/profile";
+import { useUpdateProfilePhoto } from "../../api/profile";
 
 export const updateProfile = (profile) => {
   return async (dispatch) => {
@@ -24,6 +25,21 @@ export const fetchProfile = () => {
       const response = await getProfile();
       dispatch({
         type: FETCH_PROFILE,
+        payload: response,
+      });
+    } catch (error) {
+      console.error(error);
+      // Handle error
+    }
+  };
+};
+
+export const changeProfilePicture = (formData) => {
+  return async (dispatch) => {
+    try {
+      const response = await useUpdateProfilePhoto(formData);
+      dispatch({
+        type: UPDATE_PROFILE,
         payload: response,
       });
     } catch (error) {

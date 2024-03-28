@@ -2,8 +2,20 @@ import axios from "axios";
 
 const baseUrl = "http://localhost:8000";
 
+const apiUnauthenticated = axios.create({
+  baseURL: baseUrl,
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
+});
+
 const apiClient = axios.create({
   baseURL: baseUrl,
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
 });
 
 // Request interceptor for API calls
@@ -13,8 +25,6 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers = {
         Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
       };
     }
     config.withCredentials = true;
@@ -67,4 +77,4 @@ apiClient.interceptors.response.use(
   }
 );
 
-export default apiClient;
+export { apiClient, apiUnauthenticated };

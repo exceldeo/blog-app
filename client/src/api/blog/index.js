@@ -1,7 +1,12 @@
-import apiClient from "../apiClient";
+import { apiClient, apiUnauthenticated } from "../apiClient";
 
-export const getBlogs = async (page = 1) => {
+export const getBlogs = async ({ page = 1, guest = false }) => {
   try {
+    if (guest) {
+      const response = await apiUnauthenticated.get(`/postList/?page=${page}`);
+      return response.data;
+    }
+
     const response = await apiClient.get(`/postList/?page=${page}`);
     return response.data;
   } catch (error) {

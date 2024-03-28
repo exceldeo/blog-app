@@ -8,12 +8,14 @@ import {
   getBlogs,
 } from "../../api/blog";
 
-export const fetchBlogs = (page = 1) => {
+export const fetchBlogs = ({ page = 1, guest = false }) => {
+  console.log("fetchBlogs", page, guest);
+
   return async (dispatch) => {
     try {
-      const blogs = await getBlogs(page);
+      const blogs = await getBlogs({ page: page, guest: guest });
       if (page > 1) {
-        const additionalBlogs = await getBlogs(page - 1);
+        const additionalBlogs = await getBlogs({ page: page - 1 });
         blogs.results = [...additionalBlogs.results, ...blogs.results];
       }
       dispatch({

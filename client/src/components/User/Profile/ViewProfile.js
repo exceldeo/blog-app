@@ -1,10 +1,11 @@
-// ViewProfile.js
 import React from "react";
-import { useSelector } from "react-redux";
-import { Typography, Grid, Avatar } from "@mui/material"; // Added Avatar component for user icon
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { Typography, Grid, Avatar, Button } from "@mui/material";
 import { useEffect } from "react";
-import { fetchProfile } from "../../../redux/actions/profileActions";
+import {
+  fetchProfile,
+  changeProfilePicture,
+} from "../../../redux/actions/profileActions";
 import MainLayout from "../../Layout/MainLayout";
 import MainCard from "../../../ui-component/cards/MainCard";
 
@@ -13,10 +14,12 @@ const ViewProfile = () => {
   const profile = useSelector((state) => state.profile);
 
   useEffect(() => {
-    if (!profile.user) {
+    if (!profile) {
       dispatch(fetchProfile());
     }
-  }, [dispatch, profile.user]);
+  }, [dispatch, profile]);
+
+  const [editProfilePicture, setEditProfilePicture] = React.useState(true);
 
   return (
     <MainLayout>
@@ -24,11 +27,69 @@ const ViewProfile = () => {
         <Grid item xs={12}>
           <MainCard>
             <Grid container spacing={2} alignItems="center">
-              {" "}
-              {/* Centering the items vertically */}
-              <Grid item>
-                <Avatar sx={{ width: 96, height: 96 }}>ED</Avatar>{" "}
-                {/* User icon */}
+              <Grid alignItems={"center"} justifyContent={"center"}>
+                <Grid
+                  item
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}>
+                  {profile && profile?.profile_picture ? (
+                    <Avatar
+                      sx={{ width: 96, height: 96 }}
+                      src={profile?.profile_picture}
+                    />
+                  ) : (
+                    <Avatar sx={{ width: 96, height: 96 }}>
+                      {profile.usename && profile.username[0]}
+                    </Avatar>
+                  )}
+                </Grid>
+                <div
+                  style={{
+                    marginTop: "10px",
+                  }}>
+                  {editProfilePicture ? (
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setEditProfilePicture(!editProfilePicture);
+                      }}>
+                      Edit Picture
+                    </Button>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        id="fileInput"
+                        accept="image/*"
+                        style={{ display: "none" }} // Hide the default file input
+                        onChange={(e) => {
+                          const formData = new FormData();
+                          formData.append("profile_picture", e.target.files[0]);
+                          dispatch(changeProfilePicture(formData)).then(() => {
+                            dispatch(fetchProfile());
+                          });
+                          setEditProfilePicture(!editProfilePicture);
+                        }}
+                      />
+                      <label htmlFor="fileInput">
+                        <Button variant="contained" component="span">
+                          Upload
+                        </Button>
+                      </label>
+                      <Button
+                        sx={{ marginLeft: "10px" }}
+                        variant="outlined"
+                        onClick={() => {
+                          setEditProfilePicture(!editProfilePicture);
+                        }}>
+                        Cancel
+                      </Button>
+                    </>
+                  )}
+                </div>
               </Grid>
               <Grid item xs>
                 <Typography variant="h2">

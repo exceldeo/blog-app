@@ -1,8 +1,11 @@
-import apiClient from "../apiClient";
+import { apiUnauthenticated, apiClient } from "../apiClient";
 
 export const login = async (username, password) => {
   try {
-    const response = await apiClient.post("/login/", { username, password });
+    const response = await apiUnauthenticated.post("/login/", {
+      username,
+      password,
+    });
     if (response.data.refresh && response.data.access) {
       localStorage.setItem("refreshToken", response.data.refresh);
       localStorage.setItem("accessToken", response.data.access);
@@ -30,7 +33,7 @@ export const register = async ({
     last_name: lname,
   };
   try {
-    const response = await apiClient.post("/register/", data);
+    const response = await apiUnauthenticated.post("/register/", data);
     return response.data;
   } catch (error) {
     throw error;
