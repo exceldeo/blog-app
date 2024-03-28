@@ -1,7 +1,9 @@
 from django.shortcuts import render
 
+from .models import UserProfile
+
 # Create your views here.
-from .serializers import RegisterSerializer, ChangePasswordSerializer, UserSerializer
+from .serializers import RegisterSerializer, ChangePasswordSerializer, UserSerializer, UserProfileSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import generics
 from django.contrib.auth.models import User
@@ -50,15 +52,32 @@ class UpdateProfile(generics.UpdateAPIView):
     
     def post(self, request, *args, **kwargs):  # Updated method to post
         user = self.get_object()
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer = UserSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             updated_user = serializer.save()
-            user_data = UserSerializer(updated_user).data
-            user_data["is_user_admin"] = user.is_staff  # Add is_user_admin to user data
+            user_data = UserSerializer(updated_user,context={'request': request}).data
+            user_data["is_user_admin"] = user.is_superuser  # Add is_user_admin to user data
             return Response(user_data, status=status.HTTP_200_OK)  # Return user data with is_user_admin
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class UpdateProfilePhoto(generics.UpdateAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = (IsAuthenticated,)
 
+    def get_object(self):
+        return self.request.user.userprofile
+    
+    def post(self, request, *args, **kwargs):  # Updated method to post
+        user_profile = UserProfile.objects.get(user=request.user)
+        serializer = UserProfileSerializer(user_profile, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            user_data = UserSerializer(request.user,context={'request': request}).data
+            user_data["is_user_admin"] = request.user.is_superuser
+            return Response(user_data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Logout(APIView):
@@ -79,6 +98,6 @@ class GetProfile(APIView):
 
     def get(self, request):
         user = request.user
-        serializer = UserSerializer(user)
-        is_user_admin = user.is_staff  # Check if user is admin
+        serializer = UserSerializer(user,context={'request': request})
+        is_user_admin = user.is_superuser  # Check if user is admin
         return Response({**serializer.data, "is_user_admin": is_user_admin})
