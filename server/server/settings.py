@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django_filters',
     'versatileimagefield',
     'post', # Add the post app to the list of installed apps
+    'user_auth',
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -55,7 +57,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'corsheaders.middleware.CorsMiddleware',
+    'server.middleware.RequestTimeMiddleware',
+    'server.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'server.urls'
@@ -131,8 +135,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
@@ -160,12 +162,11 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    'http://localhost:3000',
 ]
 
-
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
+    'http://127.0.0.1:3000',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -173,8 +174,8 @@ CORS_ALLOW_CREDENTIALS = True
 SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True
 }
 
 CACHES = {
@@ -189,3 +190,33 @@ CACHES = {
 }
 
 CACHE_TTL = 60 * 1500
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+AWS_ACCESS_KEY_ID = 'GzourffwSaDENY683oik'
+AWS_SECRET_ACCESS_KEY = 'BxBb9oEzibvV2MI6LGeQGQhhTJaeopH7iEYafejB'
+AWS_STORAGE_BUCKET_NAME = 'blog-app'
+AWS_S3_ENDPOINT_URL = 'http://10.22.76.146:9000'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_LOCATION = 'static'
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_REGION_NAME = 'us-east-1'  # or your region
+
+STATIC_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

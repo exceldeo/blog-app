@@ -2,10 +2,11 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from post.models import Post
-from post.serializers import PostSerializer
+from post.models import Post, Comment
+from post.serializers import PostSerializer, CommentSerializer
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from post.permissions import IsAuthorOrAdminOrReadOnly
 
@@ -29,10 +30,12 @@ class PostList(generics.ListCreateAPIView):
         if not queryset:
             queryset = Post.objects.all()
             cache.set('posts', queryset, timeout=CACHE_TTL)
-        if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
-            return queryset.filter(title__icontains=self.request.query_params['keyword']).order_by('-created_at')
-        if not self.request.user.is_authenticated or self.request.user.is_superuser:
+        # if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
+        #     return queryset.filter(title__icontains=self.request.query_params['keyword']).order_by('-created_at')
+        if not self.request.user.is_authenticated:
             return queryset.filter(active=True).order_by('-created_at')
+        if self.request.user.is_authenticated:
+            return queryset.filter(author=self.request.user).order_by('-created_at')
         return queryset.order_by('-created_at')
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -61,25 +64,102 @@ class PostUpdate(generics.UpdateAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
 
-    def perform_update(self, serializer):
-        serializer.save()
-        
+    def post(self, request, *args, **kwargs):
+        post_id = request.data.get('id')
+        if not post_id:
+            return JsonResponse({"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_superuser and request.user.username != post.author:
+            return JsonResponse({"error": "You do not have permission to update this post"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.serializer_class(post, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            # Invalidate the cache for this post
+            cache.set(f'post_{post_id}', post, timeout=CACHE_TTL)
+            cache.delete('posts')
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PostDelete(generics.DestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
 
-    def perform_destroy(self, instance):
-        instance.delete()
+    def post(self, request, *args, **kwargs):
+        post_id = request.data.get('id')
+        if not post_id:
+            return JsonResponse({"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_superuser and request.user.username != post.author:
+            return JsonResponse({"error": "You do not have permission to delete this post"}, status=status.HTTP_403_FORBIDDEN)
+
+        post.delete()
+        cache.delete(f'post_{post_id}')
+        cache.delete('posts')
+        return JsonResponse({"message": "Post deleted successfully"}, status=status.HTTP_200_OK)
     
 class PostChangeStatus(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
     
-    def perform_update(self, serializer):
-        serializer.save(active=not serializer.instance.active)
+    def post(self, request, *args, **kwargs):
+        post_id = request.data.get('id')
+        if not post_id:
+            return JsonResponse({"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_superuser and request.user.username != post.author:
+            return JsonResponse({"error": "You do not have permission to change the status of this post"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.serializer_class(post)
+        post = serializer.change_status(post)
+        cache.set(f'post_{post_id}', post, timeout=CACHE_TTL)
+        cache.delete('posts')
+        return JsonResponse(serializer.data)
     
-        
+class CommentList(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        post_id = self.request.query_params.get('post', None)
+        if post_id is not None:
+            queryset = cache.get(f'comments_{post_id}')
+            if not queryset:
+                queryset = Comment.objects.filter(post=post_id).order_by('-created_at')
+                cache.set(f'comments_{post_id}', queryset, timeout=CACHE_TTL)
+            return queryset
+        else:
+            return Comment.objects.none()  # Return an empty queryset if no post ID is provided
+    
+class CommentCreate(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        post_id = self.request.data.get('post', None)
+        if post_id is not None:
+            serializer.save(author=self.request.user, post_id=post_id)
+            # Invalidate the cache for the comments of this post
+            cache.delete(f'comments_{post_id}')
+
