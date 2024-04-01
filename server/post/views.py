@@ -2,8 +2,8 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from post.models import Post, Comment
-from post.serializers import PostSerializer, CommentSerializer
+from post.models import Post, Comment, Like
+from post.serializers import PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -30,8 +30,15 @@ class PostList(generics.ListCreateAPIView):
         if not queryset:
             queryset = Post.objects.all()
             cache.set('posts', queryset, timeout=CACHE_TTL)
-        # if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
-        #     return queryset.filter(title__icontains=self.request.query_params['keyword']).order_by('-created_at')
+        if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
+            queryset = queryset.filter(title__icontains=self.request.query_params['keyword'])
+        if 'start_date' and 'end_date' in self.request.query_params and self.request.query_params['start_date'] is not None and self.request.query_params['end_date'] is not None:
+            queryset = queryset.filter(
+                created_at__range=[
+                    self.request.query_params['start_date'],
+                    self.request.query_params['end_date']
+                ]
+            )
         if not self.request.user.is_authenticated:
             return queryset.filter(active=True).order_by('-created_at')
         if self.request.user.is_authenticated:
@@ -163,3 +170,61 @@ class CommentCreate(generics.CreateAPIView):
             # Invalidate the cache for the comments of this post
             cache.delete(f'comments_{post_id}')
 
+class LikeCreate(generics.CreateAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        post_id = self.request.data.get('post', None)
+        if post_id is not None:
+            check_like = Like.objects.filter(post_id=post_id, author=self.request.user)
+
+            if check_like.exists():
+                return JsonResponse({"error": "You have already liked this post"}, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer.save(author=self.request.user, post_id=post_id)
+            # Invalidate the cache for the comments of this post
+            cache.delete(f'comments_{post_id}')
+            cache.delete('posts')
+            cache.delete(f'post_{post_id}')
+
+class LikeDelete(generics.DestroyAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        post_id = request.data.get('post')
+        if not post_id:
+            return JsonResponse({"error": "Post ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            like = Like.objects.get(post_id=post_id, author=request.user)
+        except Like.DoesNotExist:
+            return JsonResponse({"error": "Like not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        like.delete()
+        # Invalidate the cache for the comments of this post
+        cache.delete(f'comments_{post_id}')
+        cache.delete('posts')
+        cache.delete(f'post_{post_id}')
+        return JsonResponse({"message": "Like deleted successfully"}, status=status.HTTP_200_OK)
+
+class LikeList(generics.ListCreateAPIView):
+    serializer_class = LikeSerializer
+    permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        post_id = self.request.query_params.get('post', None)
+        if post_id is not None:
+            queryset = cache.get(f'likes_{post_id}')
+            if not queryset:
+                queryset = Like.objects.filter(post=post_id).order_by('-created_at')
+                cache.set(f'likes_{post_id}', queryset, timeout=CACHE_TTL)
+            return queryset
+        else:
+            return Like.objects.none()  # Return an empty queryset if no post ID is provided

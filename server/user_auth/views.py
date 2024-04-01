@@ -4,7 +4,7 @@ from .models import UserProfile
 
 # Create your views here.
 from .serializers import RegisterSerializer, ChangePasswordSerializer, UserSerializer, UserProfileSerializer
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
@@ -101,3 +101,11 @@ class GetProfile(APIView):
         serializer = UserSerializer(user,context={'request': request})
         is_user_admin = user.is_superuser  # Check if user is admin
         return Response({**serializer.data, "is_user_admin": is_user_admin})
+
+class GetAllUsers(APIView):
+    permission_classes = (IsAdminUser,)
+
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True, context={'request': request})
+        return Response(serializer.data)
