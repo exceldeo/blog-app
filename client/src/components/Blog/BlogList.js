@@ -3,10 +3,9 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs } from "../../redux/actions/blogActions";
 import { List, Button } from "@mui/material";
-import { Link } from "react-router-dom";
 import MainLayout from "../Layout/MainLayout";
-import MainCard from "../../ui-component/cards/MainCard";
 import { Typography } from "@mui/material";
+import CardPost from "../../ui-component/cards/CardPost";
 
 const BlogList = () => {
   const dispatch = useDispatch();
@@ -24,25 +23,7 @@ const BlogList = () => {
     <MainLayout>
       <List>
         {blogs && blogs.results.length !== 0 ? (
-          blogs.results.map((blog) => (
-            <MainCard title={blog.title} key={blog.id} sx={{ mb: 3 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  whiteSpace: "pre-line",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                }}>
-                {blog.content}
-              </Typography>
-              <Button component={Link} to={`/blog/${blog.id}`}>
-                Read More
-              </Button>
-            </MainCard>
-          ))
+          blogs.results.map((blog, idx) => <CardPost blog={blog} key={idx} />)
         ) : (
           <Typography variant="h6" sx={{ textAlign: "center", mt: 5, mb: 5 }}>
             No Data Blog

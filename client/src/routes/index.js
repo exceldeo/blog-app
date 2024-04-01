@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { getProfile } from "../api/profile";
 import { updateProfile } from "../redux/actions/profileActions";
+import SearchPost from "../components/Blog/SearchPost";
 
 function PrivateRoute({ children }) {
   const { token } = useSelector((state) => state.auth);
@@ -72,6 +73,14 @@ function AppRoutes() {
         element={
           <PublicRoute>
             <BlogPost />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/search/:query"
+        element={
+          <PublicRoute>
+            <SearchPost />
           </PublicRoute>
         }
       />
@@ -149,6 +158,14 @@ function AppRoutes() {
           }
         />
       </Route>
+      <Route
+        path="404"
+        element={
+          <PublicRoute>
+            <NotFound />
+          </PublicRoute>
+        }
+      />
 
       <Route
         path="*"

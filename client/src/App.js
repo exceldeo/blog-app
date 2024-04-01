@@ -6,6 +6,7 @@ import { ThemeProvider, StyledEngineProvider } from "@mui/material/styles"; // R
 import CssBaseline from "@mui/material/CssBaseline"; // Correct import for CssBaseline
 import theme from "./themes";
 import { BrowserRouter as Router } from "react-router-dom";
+import SearchButton from "./ui-component/Button/SearchButton";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <Router>
+              <SearchButton />
               <Routes />
             </Router>
           </PersistGate>
