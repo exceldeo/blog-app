@@ -56,7 +56,7 @@ const FormLogin = ({ ...others }) => {
             dispatch(login(values.username, values.password));
             setStatus({ success: true });
             setSubmitting(false);
-            navigate("/");
+            navigate("/user");
           } catch (err) {
             console.error(err);
             setStatus({ success: false });

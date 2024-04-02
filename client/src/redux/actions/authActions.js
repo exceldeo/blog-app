@@ -1,5 +1,5 @@
 // authActions.js
-import { LOGIN, LOGOUT, REGISTER } from "../types";
+import { LOGIN, LOGOUT, REGISTER, UPDATE_PROFILE } from "../types";
 import {
   login as loginApi,
   logout as logoutApi,
@@ -26,6 +26,10 @@ export const logout = () => {
     try {
       await logoutApi();
       dispatch({
+        type: UPDATE_PROFILE,
+        payload: null,
+      });
+      dispatch({
         type: LOGOUT,
       });
     } catch (error) {
@@ -45,7 +49,7 @@ export const register = ({
 }) => {
   return async (dispatch) => {
     try {
-      const response = await registerApi({
+      await registerApi({
         username,
         password,
         confirmPassword,
@@ -55,7 +59,6 @@ export const register = ({
       });
       dispatch({
         type: REGISTER,
-        payload: response,
       });
     } catch (error) {
       console.error(error);

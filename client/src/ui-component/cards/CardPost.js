@@ -14,9 +14,12 @@ import { motion, useAnimation } from "framer-motion";
 import { createLike, deleteLike } from "../../api/like/index";
 import { useDispatch } from "react-redux";
 import { fetchBlogs } from "../../redux/actions/blogActions";
+import { useNavigate } from "react-router-dom";
 
 const CardPost = ({ blog }) => {
   const { user } = useSelector((state) => state.profile);
+  const { token } = useSelector((state) => state.auth);
+  const navigator = useNavigate();
   const controls = useAnimation();
   const sequence = async () => {
     await controls.start({ scale: 1.3, transition: { duration: 0.2 } });
@@ -26,17 +29,21 @@ const CardPost = ({ blog }) => {
 
   const handleLike = async (post_id) => {
     await createLike(post_id).then(() => {
-      dispatch(fetchBlogs({}));
+      dispatch(fetchBlogs({ guest: true }));
     });
   };
 
   const handleUnlike = async (post_id) => {
     await deleteLike(post_id).then(() => {
-      dispatch(fetchBlogs({}));
+      dispatch(fetchBlogs({ guest: true }));
     });
   };
 
   const handleHeartClick = () => {
+    if (!user || !token) {
+      navigator("/login");
+      return;
+    }
     sequence();
     const isLiked = blog.likes.some((like) => like.author === user.username);
     if (isLiked) {
@@ -80,6 +87,9 @@ const CardPost = ({ blog }) => {
               <IconHeart stroke={1.5} size="1.3rem" color="gray" />
             )}
           </motion.div>
+          <Typography variant="body2" sx={{ ml: 0.5 }}>
+            {blog.likes.length}
+          </Typography>
           <Box sx={{ ml: 0.5 }} />
           <IconMessageCircle
             stroke={1.5}

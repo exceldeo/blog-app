@@ -1,14 +1,25 @@
 import { apiClient, apiUnauthenticated } from "../apiClient";
 import { toast } from "react-toastify";
 
-export const getBlogs = async ({ page = 1, guest = false }) => {
+export const getBlogs = async ({
+  page = 1,
+  guest = false,
+  start_date,
+  end_date,
+}) => {
   try {
+    let url = `/postList/?page=${page}`;
+
+    if (start_date && end_date) {
+      url += `&start_date=${start_date}&end_date=${end_date}`;
+    }
+
     if (guest) {
-      const response = await apiUnauthenticated.get(`/postList/?page=${page}`);
+      const response = await apiUnauthenticated.get(url);
       return response.data;
     }
 
-    const response = await apiClient.get(`/postList/?page=${page}`);
+    const response = await apiClient.get(url);
     return response.data;
   } catch (error) {
     throw error;

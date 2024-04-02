@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { fetchProfile } from "../redux/actions/profileActions";
 import SearchPost from "../components/Blog/SearchPost";
+import UsersTable from "../components/User";
 
 function PrivateRoute({ children }) {
   const { token } = useSelector((state) => state.auth);
@@ -52,7 +53,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<BlogList />} />
       <Route path="/blog/:id" element={<BlogPost />} />
-      <Route path="/search/:query" element={<SearchPost />} />
+      <Route path="/search" element={<SearchPost />} />
       <Route
         path="/login"
         element={
@@ -99,6 +100,14 @@ function AppRoutes() {
           element={
             <PrivateRoute>
               <UserBlogEdit />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="all-user"
+          element={
+            <PrivateRoute>
+              <UsersTable />
             </PrivateRoute>
           }
         />

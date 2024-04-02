@@ -18,7 +18,7 @@ const authReducer = (state = initialState, action) => {
         token: null,
       };
     case REGISTER:
-      return action.payload;
+      return state;
     default:
       return state;
   }
