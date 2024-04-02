@@ -46,3 +46,4 @@ class Like(models.Model):
     def __str__(self):
         post_title = Post.objects.filter(id=self.post_id).first().title if Post.objects.filter(id=self.post_id).exists() else "Post Deleted"
         return post_title
+

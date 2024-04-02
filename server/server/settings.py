@@ -90,8 +90,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'slave': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'slavedb.sqlite3',
+        'TEST': {
+            'MIRROR': 'default',
+        },
     }
 }
+
+DATABASE_ROUTERS = ['server.routers.MasterSlaveRouter']
 
 
 # Password validation
@@ -208,7 +217,7 @@ LOGGING = {
 AWS_ACCESS_KEY_ID = 'GzourffwSaDENY683oik'
 AWS_SECRET_ACCESS_KEY = 'BxBb9oEzibvV2MI6LGeQGQhhTJaeopH7iEYafejB'
 AWS_STORAGE_BUCKET_NAME = 'blog-app'
-AWS_S3_ENDPOINT_URL = 'http://10.22.76.146:9000'
+AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }

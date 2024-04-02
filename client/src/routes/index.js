@@ -17,8 +17,7 @@ import ChangePassword from "../components/User/Profile/ChangePassword";
 import { logout } from "../redux/actions/authActions";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { getProfile } from "../api/profile";
-import { updateProfile } from "../redux/actions/profileActions";
+import { fetchProfile } from "../redux/actions/profileActions";
 import SearchPost from "../components/Blog/SearchPost";
 
 function PrivateRoute({ children }) {
@@ -35,18 +34,7 @@ function PrivateRoute({ children }) {
 
   useEffect(() => {
     if (!user && token) {
-      getProfile()
-        .then((data) => {
-          dispatch(updateProfile(data));
-        })
-        .catch((error) => {
-          if (error.response && error.response.status === 401) {
-            dispatch(logout());
-            navigate("/login");
-          } else {
-            console.error("Error while fetching profile:", error);
-          }
-        });
+      dispatch(fetchProfile());
     }
   }, [user, dispatch, token, navigate]);
 
@@ -54,36 +42,17 @@ function PrivateRoute({ children }) {
 }
 
 function PublicRoute({ children }) {
-  return children;
+  const { token } = useSelector((state) => state.auth);
+
+  return token ? <Navigate to="/user" /> : children;
 }
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <PublicRoute>
-            <BlogList />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/blog/:id"
-        element={
-          <PublicRoute>
-            <BlogPost />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/search/:query"
-        element={
-          <PublicRoute>
-            <SearchPost />
-          </PublicRoute>
-        }
-      />
+      <Route path="/" element={<BlogList />} />
+      <Route path="/blog/:id" element={<BlogPost />} />
+      <Route path="/search/:query" element={<SearchPost />} />
       <Route
         path="/login"
         element={
@@ -158,23 +127,9 @@ function AppRoutes() {
           }
         />
       </Route>
-      <Route
-        path="404"
-        element={
-          <PublicRoute>
-            <NotFound />
-          </PublicRoute>
-        }
-      />
+      <Route path="404" element={<NotFound />} />
 
-      <Route
-        path="*"
-        element={
-          <PublicRoute>
-            <NotFound />
-          </PublicRoute>
-        }
-      />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

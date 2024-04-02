@@ -9,8 +9,6 @@ import {
 } from "../../api/blog";
 
 export const fetchBlogs = ({ page = 1, guest = false }) => {
-  console.log("fetchBlogs", page, guest);
-
   return async (dispatch) => {
     try {
       const blogs = await getBlogs({ page: page, guest: guest });

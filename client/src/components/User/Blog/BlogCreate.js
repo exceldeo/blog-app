@@ -62,6 +62,8 @@ const CreatePost = () => {
               ) => {
                 try {
                   dispatch(createBlog(values)); // Dispatch the correct action
+                  initialValues.title = "";
+                  initialValues.content = "";
                   setStatus({ success: true });
                   setSubmitting(false);
                 } catch (err) {

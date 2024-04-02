@@ -45,7 +45,7 @@ import { useSelector } from "react-redux";
 
 const ProfileSection = () => {
   const theme = useTheme();
-  const user = useSelector((state) => state.profile);
+  const { user } = useSelector((state) => state.profile);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   /**

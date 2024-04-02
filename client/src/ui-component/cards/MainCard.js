@@ -33,6 +33,7 @@ const MainCard = forwardRef(
       sx = {},
       radius = 12,
       title,
+      options,
       ...others
     },
     ref
@@ -64,7 +65,7 @@ const MainCard = forwardRef(
             action={secondary}
           />
         )}
-
+        {options}
         {/* content & header divider */}
         {title && <Divider />}
 

@@ -1,13 +1,10 @@
 from django.http import JsonResponse
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework import status
 from post.models import Post, Comment, Like
 from post.serializers import PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
 from post.permissions import IsAuthorOrAdminOrReadOnly
 
 from rest_framework.pagination import PageNumberPagination
@@ -17,18 +14,20 @@ from django.core.cache import cache
 from server.settings import CACHE_TTL
 
 class PostList(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
+    queryset = Post.objects.using('slave').all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+        # Invalidate the cache for posts
+        cache.delete('posts')
     
     def get_queryset(self):
         queryset = cache.get('posts')
         if not queryset:
-            queryset = Post.objects.all()
+            queryset = Post.objects.using('slave').all()
             cache.set('posts', queryset, timeout=CACHE_TTL)
         if 'keyword' in self.request.query_params and self.request.query_params['keyword'] is not None:
             queryset = queryset.filter(title__icontains=self.request.query_params['keyword'])
@@ -46,7 +45,7 @@ class PostList(generics.ListCreateAPIView):
         return queryset.order_by('-created_at')
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
+    queryset = Post.objects.using('slave').all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrAdminOrReadOnly]
     
@@ -65,6 +64,8 @@ class PostCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+        # Invalidate the cache for posts
+        cache.delete('posts')
 
 class PostUpdate(generics.UpdateAPIView):
     queryset = Post.objects.all()
@@ -112,6 +113,7 @@ class PostDelete(generics.DestroyAPIView):
             return JsonResponse({"error": "You do not have permission to delete this post"}, status=status.HTTP_403_FORBIDDEN)
 
         post.delete()
+        post.delete(using='slave')
         cache.delete(f'post_{post_id}')
         cache.delete('posts')
         return JsonResponse({"message": "Post deleted successfully"}, status=status.HTTP_200_OK)
@@ -146,17 +148,22 @@ class CommentList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+        # Invalidate the cache for comments of this post
+        post_id = self.request.data.get('post', None)
+        if post_id is not None:
+            cache.delete(f'comments_{post_id}')
 
     def get_queryset(self):
         post_id = self.request.query_params.get('post', None)
+        print(post_id)
         if post_id is not None:
             queryset = cache.get(f'comments_{post_id}')
             if not queryset:
-                queryset = Comment.objects.filter(post=post_id).order_by('-created_at')
+                queryset = Comment.objects.using('slave').filter(post_id=post_id).order_by('-created_at')
                 cache.set(f'comments_{post_id}', queryset, timeout=CACHE_TTL)
             return queryset
         else:
-            return Comment.objects.none()  # Return an empty queryset if no post ID is provided
+            return Comment.objects.using('slave').none()  # Return an empty queryset if no post ID is provided
     
 class CommentCreate(generics.CreateAPIView):
     queryset = Comment.objects.all()
@@ -198,13 +205,15 @@ class LikeDelete(generics.DestroyAPIView):
         post_id = request.data.get('post')
         if not post_id:
             return JsonResponse({"error": "Post ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
+        print(post_id, request.user)
         try:
             like = Like.objects.get(post_id=post_id, author=request.user)
         except Like.DoesNotExist:
             return JsonResponse({"error": "Like not found"}, status=status.HTTP_404_NOT_FOUND)
         
         like.delete()
+        like = Like.objects.using('slave').get(post_id=post_id, author=request.user)
+        like.delete(using='slave')
         # Invalidate the cache for the comments of this post
         cache.delete(f'comments_{post_id}')
         cache.delete('posts')
@@ -223,8 +232,8 @@ class LikeList(generics.ListCreateAPIView):
         if post_id is not None:
             queryset = cache.get(f'likes_{post_id}')
             if not queryset:
-                queryset = Like.objects.filter(post=post_id).order_by('-created_at')
+                queryset = Like.objects.using('slave').filter(post_id=post_id).order_by('-created_at')
                 cache.set(f'likes_{post_id}', queryset, timeout=CACHE_TTL)
             return queryset
         else:
-            return Like.objects.none()  # Return an empty queryset if no post ID is provided
+            return Like.objects.using('slave').none()  # Return an empty queryset if no post ID is provided

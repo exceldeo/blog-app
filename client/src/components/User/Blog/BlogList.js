@@ -19,7 +19,7 @@ import { changeStatusBlog } from "../../../redux/actions/blogActions";
 const BlogList = () => {
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blog.blogs);
-  const profile = useSelector((state) => state.profile);
+  const { user } = useSelector((state) => state.profile);
   useEffect(() => {
     dispatch(fetchBlogs({}));
   }, [dispatch]);
@@ -60,7 +60,7 @@ const BlogList = () => {
               sx={{ mb: 3 }}
               secondary={
                 <>
-                  {blog.author === profile.username && (
+                  {blog.author === user.username && (
                     <>
                       <SecondaryAction
                         icon={<IconEye fontSize="small" />}

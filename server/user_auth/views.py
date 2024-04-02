@@ -15,13 +15,17 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 
 
 class Register(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.all()  # Use the default database for creation
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        instance.save(using='slave')  # Also save to the slave database
+
 
 class ChangePassword(generics.UpdateAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.all()  # Use the default database for updates
     serializer_class = ChangePasswordSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -36,6 +40,7 @@ class ChangePassword(generics.UpdateAPIView):
                 return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
             user.set_password(serializer.data.get('new_password'))
             user.save()
+            user.save(using='slave')  # Also save changes to the slave database
             return Response(
                 {"message": "Password updated successfully"},
                 status=status.HTTP_200_OK)
@@ -43,7 +48,7 @@ class ChangePassword(generics.UpdateAPIView):
 
 
 class UpdateProfile(generics.UpdateAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.all()  # Use the default database for updates
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -55,13 +60,14 @@ class UpdateProfile(generics.UpdateAPIView):
         serializer = UserSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             updated_user = serializer.save()
+            updated_user.save(using='slave')  # Also save changes to the slave database
             user_data = UserSerializer(updated_user,context={'request': request}).data
             user_data["is_user_admin"] = user.is_superuser  # Add is_user_admin to user data
             return Response(user_data, status=status.HTTP_200_OK)  # Return user data with is_user_admin
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class UpdateProfilePhoto(generics.UpdateAPIView):
-    queryset = UserProfile.objects.all()
+    queryset = UserProfile.objects.all()  # Use the default database for updates
     serializer_class = UserProfileSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -73,6 +79,7 @@ class UpdateProfilePhoto(generics.UpdateAPIView):
         serializer = UserProfileSerializer(user_profile, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
+            serializer.instance.save(using='slave')  # Also save changes to the slave database
             user_data = UserSerializer(request.user,context={'request': request}).data
             user_data["is_user_admin"] = request.user.is_superuser
             return Response(user_data, status=status.HTTP_200_OK)
@@ -88,6 +95,7 @@ class Logout(APIView):
             refresh_token = request.data["refresh_token"]
             token = RefreshToken(refresh_token)
             token.blacklist()
+            BlacklistedToken.objects.using('slave').create(token=token)  # Also blacklist on the slave database
 
             return Response(status=status.HTTP_205_RESET_CONTENT, data={"message": "Logout successful"})
         except Exception as e:
@@ -106,6 +114,6 @@ class GetAllUsers(APIView):
     permission_classes = (IsAdminUser,)
 
     def get(self, request):
-        users = User.objects.all()
+        users = User.objects.using('slave').all()  # Read from the slave database
         serializer = UserSerializer(users, many=True, context={'request': request})
         return Response(serializer.data)

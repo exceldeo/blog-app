@@ -12,27 +12,31 @@ class CommentSerializer(serializers.ModelSerializer):
         ordering = ['-created_at']
     
     def create(self, validated_data):
-        return Comment.objects.create(**validated_data)
+        comment = Comment.objects.create(**validated_data)
+        Comment.objects.using('slave').create(**validated_data)
+        return comment
     
     def update(self, instance, validated_data):
         instance.content = validated_data.get('content', instance.content)
         instance.save()
+        instance.save(using='slave')
         return instance
     
     def destroy(self, instance):
         instance.delete()
+        instance.delete(using='slave')
         return instance
     
     def find_by_id_and_author(self, id, author):
         try:
-            comment = Comment.objects.get(id=id, author=author)
+            comment = Comment.objects.using('slave').get(id=id, author=author)
             return comment
         except Comment.DoesNotExist:
             return Response({"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
         
     def find_by_post(self, post):
         try:
-            comment = Comment.objects.get(post=post)
+            comment = Comment.objects.using('slave').get(post=post)
             return comment
         except Comment.DoesNotExist:
             return Response({"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -45,29 +49,32 @@ class LikeSerializer(serializers.ModelSerializer):
         ordering = ['-created_at']
     
     def create(self, validated_data):
-        return Like.objects.create(**validated_data)
+        like = Like.objects.create(**validated_data)
+        Like.objects.using('slave').create(**validated_data)
+        return like
     
     def destroy(self, instance):
         instance.delete()
+        instance.delete(using='slave')
         return instance
     
     def find_by_id_and_author(self, id, author):
         try:
-            like = Like.objects.get(id=id, author=author)
+            like = Like.objects.using('slave').get(id=id, author=author)
             return like
         except Like.DoesNotExist:
             return Response({"error": "Like not found"}, status=status.HTTP_404_NOT_FOUND)
     
     def find_by_post_and_author(self, post, author):
         try:
-            like = Like.objects.get(post=post, author=author)
+            like = Like.objects.using('slave').get(post=post, author=author)
             return like
         except Like.DoesNotExist:
             return Response({"error": "Like not found"}, status=status.HTTP_404_NOT_FOUND)
         
     def find_by_post(self, post):
         try:
-            like = Like.objects.get(post=post)
+            like = Like.objects.using('slave').get(post=post)
             return like
         except Like.DoesNotExist:
             return Response({"error": "Like not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -83,39 +90,43 @@ class PostSerializer(serializers.ModelSerializer):
         ordering = ['-created_at']
     
     def create(self, validated_data):
-        return Post.objects.create(**validated_data)
+        post = Post.objects.create(**validated_data)
+        Post.objects.using('slave').create(**validated_data)
+        return post
     
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
         instance.content = validated_data.get('content', instance.content)
         instance.active = validated_data.get('active', instance.active)
         instance.save()
+        instance.save(using='slave')
         return instance
     
     def destroy(self, instance):
         instance.delete()
+        instance.delete(using='slave')
         return instance
     
     def change_status(self, instance):
         instance.active = not instance.active
         instance.save()
+        instance.save(using='slave')
         return instance
     
     def find_by_id_and_author(self, id, author):
         try:
-            post = Post.objects.get(id=id, author=author)
+            post = Post.objects.using('slave').get(id=id, author=author)
             return post
         except Post.DoesNotExist:
             return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
         
     def get_likes(self, obj):
-        likes = Like.objects.filter(post_id=obj.id)
+        likes = Like.objects.using('slave').filter(post_id=obj.id)
         return LikeSerializer(likes, many=True).data
     
     def get_comments_count(self, obj):
-        comments = Comment.objects.filter(post_id=obj.id)   
+        comments = Comment.objects.using('slave').filter(post_id=obj.id)   
         return comments.count()
     
     def filter_by_date_range(self, start_date, end_date):
-        return Post.objects.filter(created_at__range=[start_date, end_date])
-    
+        return Post.objects.using('slave').filter(created_at__range=[start_date, end_date])

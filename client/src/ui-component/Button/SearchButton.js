@@ -38,7 +38,7 @@ const SearchButton = () => {
   };
 
   return (
-    <div style={{ position: "fixed", bottom: 16, right: 16 }}>
+    <div style={{ position: "fixed", bottom: 16, right: 16, zIndex: 1000 }}>
       <Fab color="primary" onClick={handleClick}>
         <Add />
       </Fab>
