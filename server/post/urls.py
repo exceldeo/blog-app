@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PostList, PostDetail, PostCreate, PostUpdate, PostDelete, PostChangeStatus, CommentCreate, CommentList, LikeCreate, LikeDelete
+from .views import PostList, PostDetail, PostCreate, PostUpdate, PostDelete, PostChangeStatus, CommentCreate, CommentList, LikeCreate, LikeDelete, CheckDataCache
 
 urlpatterns = [
     path('postList/', PostList.as_view(), name='post_list'),
@@ -12,4 +12,5 @@ urlpatterns = [
     path('commentList/', CommentList.as_view(), name='comment_list'),
     path('likeCreate/', LikeCreate.as_view(), name='like_create'),
     path('likeDelete/', LikeDelete.as_view(), name='like_delete'),
+    path('checkDataCache/', CheckDataCache.as_view(), name='check_data_cache'),
 ]

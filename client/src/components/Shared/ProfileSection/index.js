@@ -35,6 +35,7 @@ import {
   IconLogout,
   IconUser,
   IconUserEdit,
+  IconUsers,
 } from "@tabler/icons-react";
 
 import { useDispatch } from "react-redux";
@@ -163,7 +164,7 @@ const ProfileSection = () => {
                   <PerfectScrollbar
                     style={{
                       height: "100%",
-                      maxHeight: "calc(100vh - 600px)",
+                      maxHeight: "calc(100vh - 500px)",
                       overflowX: "hidden",
                     }}>
                     <Box sx={{ p: 1 }}>
@@ -218,6 +219,26 @@ const ProfileSection = () => {
                           />
                         </ListItemButton>
                         <Divider />
+                        {user?.is_user_admin && (
+                          <ListItemButton
+                            sx={{
+                              borderRadius: `10px`,
+                            }}
+                            onClick={() => {
+                              navigate("/user/all-user");
+                            }}>
+                            <ListItemIcon>
+                              <IconUsers stroke={1.5} size="1.3rem" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Typography variant="body2">
+                                  All Users
+                                </Typography>
+                              }
+                            />
+                          </ListItemButton>
+                        )}
                         <ListItemButton
                           sx={{
                             borderRadius: `10px`,
