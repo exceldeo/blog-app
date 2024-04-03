@@ -9,6 +9,8 @@ This is a simple blog app that allows users to create, read, update and delete b
 - User authentication
 - Create, read, update and change status blog posts
 - Comment on blog posts
+- Like and unlike blog posts
+- Update user profile
 
 ## Technologies
 
@@ -19,6 +21,7 @@ This is a simple blog app that allows users to create, read, update and delete b
 
 - Redis
 - MinIo
+- Memcached
 
 ## Installation
 
@@ -37,9 +40,10 @@ This is a simple blog app that allows users to create, read, update and delete b
 
 ## Usage
 
-1. Run redis server and minio server
+1. Run redis server, minio and memcached server
    [Minio](https://docs.min.io/docs/minio-quickstart-guide.html)
    [Redis](https://redis.io/download)
+   [Memcached](https://memcached.org/)
    ![redis_minio](./screenshoot/redis_minio.png)
 2. Create a superuser
    `python manage.py createsuperuser`
@@ -54,9 +58,11 @@ This is a simple blog app that allows users to create, read, update and delete b
 - Sign up
   ![signup](./screenshoot/signup_page.png)
 - Home
-  ![home](./screenshoot/list_page.png)
+  ![home](./screenshoot/home_page.png)
 - Detail Post
   ![detail](./screenshoot/detail_post.png)
+- List Users
+  ![list_user](./screenshoot/list_users_page.png)
 - Profile
   ![profile](./screenshoot/profile_page.png)
 - Upload Profile Picture
@@ -72,11 +78,11 @@ This is a simple blog app that allows users to create, read, update and delete b
 
 ## ERD
 
-![erd](./screenshoot/ERD.png)
+![erd](./screenshoot/blog-app-ERD.png)
 
 ## Flowchart
 
-![flowchart](./screenshoot/flow.png)
+![flowchart](./screenshoot/blog-app-flowchart.png)
 
 ## API Endpoints
 
