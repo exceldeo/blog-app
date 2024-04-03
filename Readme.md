@@ -73,8 +73,12 @@ This is a simple blog app that allows users to create, read, update and delete b
   ![change](./screenshoot/change_password.png)
 - Create Post
   ![create](./screenshoot/create_post.png)
+- Update Post
+  ![update](./screenshoot/edit_post_page.png)
 - List Post
   ![list](./screenshoot/list_page_user.png)
+- List Post Search
+  ![search](./screenshoot/search_post_page.png)
 
 ## ERD
 
