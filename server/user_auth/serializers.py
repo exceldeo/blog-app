@@ -8,7 +8,7 @@ from .models import UserProfile
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
             required=True,
-            validators=[UniqueValidator(queryset=User.objects.all())]
+            validators=[UniqueValidator(queryset=User.objects.using('slave').all())]
             )
 
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -39,8 +39,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user.set_password(validated_data['password'])
         user.save()
+        user.save(using='slave')
 
+        profile_picture = validated_data.get('profile_picture', None)
         UserProfile.objects.create(user=user, profile_picture=profile_picture)
+        UserProfile.objects.using('slave').create(user=user, profile_picture=profile_picture)
 
         return user
 
@@ -66,7 +69,6 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         return value
     
 class UserProfileSerializer(serializers.ModelSerializer):
-    # profile_picture = serializers.SerializerMethodField()
     profile_picture = serializers.ImageField(max_length=None, use_url=True)
 
     class Meta:
@@ -91,7 +93,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def get_profile_picture(self, obj):
-        profile = UserProfile.objects.get(user=obj)
+        profile = UserProfile.objects.using('slave').get(user=obj)
         if profile and profile.profile_picture:
             return self.context['request'].build_absolute_uri(profile.profile_picture.url)
         else:
@@ -102,13 +104,12 @@ class UserSerializer(serializers.ModelSerializer):
         return value
     
     def validate_email(self, value):
-        if User.objects.exclude(pk=self.instance.pk).filter(email=value).exists():
+        if User.objects.using('slave').exclude(pk=self.instance.pk).filter(email=value).exists():
             raise serializers.ValidationError('This email is already in use.')
         return value
     
     def validate_username(self, value):
-        if User.objects.exclude(pk=self.instance.pk).filter(username=value).exists():
+        if User.objects.using('slave').exclude(pk=self.instance.pk).filter(username=value).exists():
             raise serializers.ValidationError('This username is already in use.')
         return value
 
-    

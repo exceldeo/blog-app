@@ -11,13 +11,13 @@ import MainCard from "../../../ui-component/cards/MainCard";
 
 const ViewProfile = () => {
   const dispatch = useDispatch();
-  const profile = useSelector((state) => state.profile);
+  const { user } = useSelector((state) => state.profile);
 
   useEffect(() => {
-    if (!profile) {
+    if (!user) {
       dispatch(fetchProfile());
     }
-  }, [dispatch, profile]);
+  }, [dispatch, user]);
 
   const [editProfilePicture, setEditProfilePicture] = React.useState(true);
 
@@ -35,14 +35,14 @@ const ViewProfile = () => {
                     justifyContent: "center",
                     alignItems: "center",
                   }}>
-                  {profile && profile?.profile_picture ? (
+                  {user && user?.profile_picture ? (
                     <Avatar
                       sx={{ width: 96, height: 96 }}
-                      src={profile?.profile_picture}
+                      src={user?.profile_picture}
                     />
                   ) : (
                     <Avatar sx={{ width: 96, height: 96 }}>
-                      {profile.usename && profile.username[0]}
+                      {user?.usename && user?.username}
                     </Avatar>
                   )}
                 </Grid>
@@ -92,18 +92,16 @@ const ViewProfile = () => {
                 </div>
               </Grid>
               <Grid item xs>
+                <Typography variant="h2">Username: {user?.username}</Typography>
+                <Typography variant="h2">Email: {user?.email}</Typography>
                 <Typography variant="h2">
-                  Username: {profile.username}
-                </Typography>
-                <Typography variant="h2">Email: {profile.email}</Typography>
-                <Typography variant="h2">
-                  First Name: {profile.first_name}
+                  First Name: {user?.first_name}
                 </Typography>
                 <Typography variant="h2">
-                  Last Name: {profile.last_name}
+                  Last Name: {user?.last_name}
                 </Typography>
                 <Typography variant="h2">
-                  Role: {profile.is_user_admin ? "Admin" : "User"}
+                  Role: {user?.is_user_admin ? "Admin" : "User"}
                 </Typography>
               </Grid>
             </Grid>

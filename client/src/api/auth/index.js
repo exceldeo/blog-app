@@ -1,4 +1,5 @@
 import { apiUnauthenticated, apiClient } from "../apiClient";
+import { toast } from "react-toastify";
 
 export const login = async (username, password) => {
   try {
@@ -10,6 +11,13 @@ export const login = async (username, password) => {
       localStorage.setItem("refreshToken", response.data.refresh);
       localStorage.setItem("accessToken", response.data.access);
     }
+
+    if (response.status === 200) {
+      toast.success("Login successful");
+    } else {
+      toast.error("Failed to login");
+    }
+
     return response.data;
   } catch (error) {
     throw error;
@@ -34,6 +42,13 @@ export const register = async ({
   };
   try {
     const response = await apiUnauthenticated.post("/register/", data);
+
+    if (response.status === 201) {
+      toast.success("User created successfully");
+    } else {
+      toast.error("Failed to create user");
+    }
+
     return response.data;
   } catch (error) {
     throw error;

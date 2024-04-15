@@ -18,12 +18,12 @@ import AnimateButton from "../../../ui-component/extended/AnimateButton";
 
 const EditProfile = () => {
   const dispatch = useDispatch();
-  const profile = useSelector((state) => state.profile);
+  const { user } = useSelector((state) => state.profile);
   const initialValues = {
-    username: profile.username,
-    email: profile.email,
-    fname: profile.first_name,
-    lname: profile.last_name,
+    username: user.username,
+    email: user.email,
+    fname: user.first_name,
+    lname: user.last_name,
     photo: "",
   };
 

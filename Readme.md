@@ -9,6 +9,8 @@ This is a simple blog app that allows users to create, read, update and delete b
 - User authentication
 - Create, read, update and change status blog posts
 - Comment on blog posts
+- Like and unlike blog posts
+- Update user profile
 
 ## Technologies
 
@@ -19,6 +21,7 @@ This is a simple blog app that allows users to create, read, update and delete b
 
 - Redis
 - MinIo
+- Memcached
 
 ## Installation
 
@@ -37,9 +40,10 @@ This is a simple blog app that allows users to create, read, update and delete b
 
 ## Usage
 
-1. Run redis server and minio server
+1. Run redis server, minio and memcached server
    [Minio](https://docs.min.io/docs/minio-quickstart-guide.html)
    [Redis](https://redis.io/download)
+   [Memcached](https://memcached.org/)
    ![redis_minio](./screenshoot/redis_minio.png)
 2. Create a superuser
    `python manage.py createsuperuser`
@@ -54,9 +58,11 @@ This is a simple blog app that allows users to create, read, update and delete b
 - Sign up
   ![signup](./screenshoot/signup_page.png)
 - Home
-  ![home](./screenshoot/list_page.png)
+  ![home](./screenshoot/home_page.png)
 - Detail Post
   ![detail](./screenshoot/detail_post.png)
+- List Users
+  ![list_user](./screenshoot/list_users_page.png)
 - Profile
   ![profile](./screenshoot/profile_page.png)
 - Upload Profile Picture
@@ -67,17 +73,67 @@ This is a simple blog app that allows users to create, read, update and delete b
   ![change](./screenshoot/change_password.png)
 - Create Post
   ![create](./screenshoot/create_post.png)
+- Update Post
+  ![update](./screenshoot/edit_post_page.png)
 - List Post
   ![list](./screenshoot/list_page_user.png)
+- List Post Search
+  ![search](./screenshoot/search_post_page.png)
 
 ## ERD
 
-![erd](./screenshoot/ERD.png)
+![erd](./screenshoot/blog-app-ERD.png)
 
 ## Flowchart
 
-![flowchart](./screenshoot/flow.png)
+![flowchart](./screenshoot/blog-app-flowchart.png)
 
 ## API Endpoints
 
 https://documenter.getpostman.com/view/11566293/2sA35G2MX6
+
+# MYPROJECT
+
+my project is a test new app for learning how to django ORM works.
+if you want to add new create seeder in migration can be run by running the following command
+`python manage.py makemigrations new_app -n create_data`
+and add the following code in the migration file
+
+```python
+from django.db import migrations
+
+def create_data(apps, schema_editor):
+    TestModel = apps.get_model('new_app', 'TestModel')
+    TestModel.objects.create(tag='tag1', text_field1='text'*5, text_field2='text'*5)
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('new_app', '0001_initial'),
+    ]
+
+    operations = [
+        migrations.RunPython(create_data),
+    ]
+```
+
+after that run the following command
+`python manage.py migrate`
+
+# Run cron job
+
+i have python script that function to count active user, you can run the script by running the following command
+`python manage.py count_active_user`
+
+1. Open the crontab editor by typing crontab -e in your terminal.
+
+2. In the editor, you can add a new cron job by adding a new line. A cron job line has the following structure:
+
+`* * * * * command-to-be-executed`
+
+- The five asterisks can be replaced with specific time units to schedule the job. From left to right, they represent: minute (0 - 59), hour (0 - 23), day of the month (1 - 31), month (1 - 12), and day of the week (0 - 7, where both 0 and 7 are Sunday).
+  To run your standalone.py script every day at midnight, for example, you can add the following line:
+
+3. Replace /usr/bin/python3 with the path to your Python interpreter, and /path/to/your/cron_count_active_users.py with the path to your standalone.py script.
+
+4. Save and close the editor to install the new cron job.

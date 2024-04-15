@@ -51,11 +51,9 @@ apiClient.interceptors.response.use(
 
     if (
       error.response.status === 401 &&
-      error.response.data.code === "token_not_valid" &&
-      error.response.data.detail === "Token is invalid or expired"
+      error.response.data.code === "token_not_valid"
     ) {
       const refreshToken = localStorage.getItem("refreshToken");
-
       if (refreshToken) {
         try {
           const response = await apiClient.post("/refresh/", {

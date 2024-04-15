@@ -36,7 +36,6 @@ const UpdatePost = () => {
 
   useEffect(() => {
     if (blog) {
-      console.log(blog);
       setInitialValues({
         title: blog.title,
         content: blog.content,
